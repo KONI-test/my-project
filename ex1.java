@@ -6,7 +6,7 @@ import javax.swing.JFileChooser;
 
 public class ex1 {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("正規化：開始");
 
         // ファイル選択ダイアログの結果
@@ -24,60 +24,55 @@ public class ex1 {
         // 日付と時間のフォーマット
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
-        try {
-            // 入力ファイル選択
-            fileChooser.setDialogTitle("正規化するファイルを選択してください。");
-            result = fileChooser.showOpenDialog(null);
+        // 入力ファイル選択
+        fileChooser.setDialogTitle("正規化するファイルを選択してください。");
+        result = fileChooser.showOpenDialog(null);
 
-            // 開くボタン押下以外の場合
-            if (result != JFileChooser.APPROVE_OPTION) {
-                System.out.println("入力ファイル選択をキャンセルしました。");
-                return;
-            }
-
-            // ファイルを読み込み
-            inputFilePath = fileChooser.getSelectedFile().getAbsolutePath();
-            List<String> lines = Files.readAllLines(Paths.get(inputFilePath));
-
-            for (String line : lines) {
-                // タブ区切りで分割
-                String[] row = line.split("\\t");
-
-                // カラムごとの組み合わせを保存
-                List<List<String>> processedColumns = new ArrayList<>();
-
-                // コロン区切りで分割し、リストに設定
-                for (String column : row) {                 
-                    String[] colonSplitColumns = column.split(":");
-
-                    List<String> subColumns = new ArrayList<>();
-                    for (String subColumn : colonSplitColumns) {
-                        subColumns.add(subColumn);
-                    }
-                    processedColumns.add(subColumns);
-                }
-
-                // カラムの組み合わせを生成
-                generateCombinations(processedColumns, new ArrayList<>(), 0, normalizedLines);
-            }
-
-            // 結果出力
-            fileChooser.setDialogTitle("出力するフォルダを選択してください。");
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            result = fileChooser.showOpenDialog(null);
-
-            // 開くボタン押下以外の場合
-            if (result != JFileChooser.APPROVE_OPTION) {
-                System.out.println("出力フォルダ選択をキャンセルしました。");
-                return;
-            }
-            outputFolder = fileChooser.getSelectedFile().getAbsolutePath();
-            outputFolder = outputFolder + File.separator + "output_" + dateFormat.format(now) + ".tsv";
-            Files.write(Paths.get(outputFolder), normalizedLines);
-
-        } catch (IOException e) {
-            System.err.println("エラーが発生しました: " + e.getMessage());
+        // 開くボタン押下以外の場合
+        if (result != JFileChooser.APPROVE_OPTION) {
+            System.out.println("入力ファイル選択をキャンセルしました。");
+            return;
         }
+
+        // ファイルを読み込み
+        inputFilePath = fileChooser.getSelectedFile().getAbsolutePath();
+        List<String> lines = Files.readAllLines(Paths.get(inputFilePath));
+
+        for (String line : lines) {
+            // タブ区切りで分割
+            String[] row = line.split("\\t");
+
+            // カラムごとの組み合わせを保存
+            List<List<String>> processedColumns = new ArrayList<>();
+
+            // コロン区切りで分割し、リストに設定
+            for (String column : row) {
+                String[] colonSplitColumns = column.split(":");
+
+                List<String> subColumns = new ArrayList<>();
+                for (String subColumn : colonSplitColumns) {
+                    subColumns.add(subColumn);
+                }
+                processedColumns.add(subColumns);
+            }
+
+            // カラムの組み合わせを生成
+            generateCombinations(processedColumns, new ArrayList<>(), 0, normalizedLines);
+        }
+
+        // 結果出力
+        fileChooser.setDialogTitle("出力するフォルダを選択してください。");
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        result = fileChooser.showOpenDialog(null);
+
+        // 開くボタン押下以外の場合
+        if (result != JFileChooser.APPROVE_OPTION) {
+            System.out.println("出力フォルダ選択をキャンセルしました。");
+            return;
+        }
+        outputFolder = fileChooser.getSelectedFile().getAbsolutePath();
+        outputFolder = outputFolder + File.separator + "ex1_output_" + dateFormat.format(now) + ".tsv";
+        Files.write(Paths.get(outputFolder), normalizedLines);
         System.out.println("正規化：終了");
     }
 
